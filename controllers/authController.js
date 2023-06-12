@@ -1,12 +1,13 @@
-import { hash as _hash, compare } from 'bcrypt'
 import { body, validationResult } from 'express-validator'
+import bcrypt from 'bcrypt';
 
-const User = require('../models/User');
+
+import User from '../models/User.js';
 
 
 
 export const register = [
-    body(["username, password, email"], "Username/Password/Email cannot be empty")
+    body(["username, password, email"], "Username/Password/Email cannot be empty/ less characters")
         .trim()
         .isLength({min:3})
         .escape(),
@@ -18,14 +19,18 @@ export const register = [
         // Lets create the User 
 
         bcrypt.hash(req.body.password, 10)
-        .then((hash) => {
-            
-            req.body.password = hash
-            User.create(req.body)
-            .then(user => res.status(201).json(user) )
-            .catch(err => res.status(500).json(err) )
-        })
-        .catch(err => res.status(500).json(err))
+            .then((hash) => {
+                
+                req.body.password = hash
+                User.create(req.body)
+                    .then((user) => {
+                        const { password, ...other } = user._doc
+                        req.session["currentUser"] = other
+                        return res.status(201).json(other)
+                    })
+                    .catch(err => res.status(500).json(err) )
+            })
+            .catch(err => res.status(500).json(err))
 
     }
 ]
@@ -44,15 +49,25 @@ export const login = [
         const err = validationResult(req.body)
         if(!err.isEmpty()) { return res.status(401).json( {errors : err.array()})}
 
-        User.findOne({ email: req.body.email}, (err, user) =>{
-            if (err || !user) { return res.status(400).json(err)}
+        User.findOne({ email: req.body.email })
+            .then((user) => {
+                if (!user) { return res.status(400).json({"message": "Not Found"}) }
 
-            bcrypt.compare(req.body.password, user.password, (err, same) =>{
-                if(!same) { return res.status(400).json({ error: "Incorrect Password"})}
+                bcrypt.compare(req.body.password, user.password)
+                    .then((same) => {
+                        if(!same) { return res.status(400).json({ error: "Incorrect Password"}) }
 
-                return res.status(200).json(user)
+                        const { password, ...other } = user._doc
+                        req.session["currentUser"] = other
+                        return res.status(200).json(other)
+                    })
+                    .catch((err) => {
+                        return res.status(400).json({ error: "Incorrect Password"})
+                    })
             })
-        })
+            .catch((err) => {
+                return res.status(400).json({ error: "User not Found" })
+            })
 
     }
 ]

@@ -1,12 +1,10 @@
 import express, { json } from 'express'
 import { connect } from 'mongoose'
-import morgan from 'morgan'
-import helmet, { crossOriginResourcePolicy } from "helmet"
+import session from 'express-session'
 import { config } from 'dotenv'
 
-// import userRoute from './routes/users'
-import authRoute from './routes/auth'
-import postRoute from './routes/post'
+import userRoute from './routes/user.js'
+import authRoute from './routes/auth.js'
 // import multer, { diskStorage } from "multer"
 import { join } from 'path'
 import cors from 'cors'
@@ -20,23 +18,31 @@ const app = express()
 const PORT = process.env.PORT || 3000
 const server = createServer(app);
 
-connect(
-    process.env.MONGOURI, () => {
-        console.log('connected to DB')
-    }
-)
 
-//Enable CORS 
+connect(process.env.MONGOURI)
+    .then(() => {
+        console.log("Connected to DB")
+    })
+    .catch((e) => {
+        console.log(err)
+    })
+
+//Enable CORS - TODO: currently allowing all clients 
 app.use(cors());
 
-
+//Use session
+app.use(session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: true
+}))
 app.use(json())
-app.use(helmet())
-app.use(crossOriginResourcePolicy({ policy: "cross-origin" }));
+app.use(cors());
 
 
 
 app.use('/api/auth', authRoute)
+app.use('/api/users', userRoute)
 
 
 

@@ -34,14 +34,18 @@ const schema = new Schema({
         type: Array,
         default: []
     },
+    reviews : {
+        type: Array,
+        default: []
+    },
+    owned : {
+        type: Array,
+        default: []
+    },
     role: {
         type: String,
-        enum: ['admin', 'manager', 'user'],
+        enum: ['admin', 'owner', 'user'],
         default: 'user',
-    },
-    desc: {
-        type: String,
-        max: 50
     },
     city: {
         type: String,
@@ -50,10 +54,6 @@ const schema = new Schema({
     from: {
         type: String,
         max: 50
-    },
-    relationship: {
-        type: Number,
-        enum: [1,2,3]
     }
 
 }, { timestamps: true });
