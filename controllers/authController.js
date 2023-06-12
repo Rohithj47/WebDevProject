@@ -1,9 +1,12 @@
-const bcrypt = require('bcrypt')
-const { body, validationResult } = require('express-validator')
+import { hash as _hash, compare } from 'bcrypt'
+import { body, validationResult } from 'express-validator'
+
+const User = require('../models/User');
 
 
-module.exports.register = [
-    body(["username, password, email", "Username/Password/Email cannot be empty"])
+
+export const register = [
+    body(["username, password, email"], "Username/Password/Email cannot be empty")
         .trim()
         .isLength({min:3})
         .escape(),
@@ -14,22 +17,20 @@ module.exports.register = [
         if (!errors.isEmpty()) { res.status(401).json({ error: errors.array()})}
         // Lets create the User 
 
-        bcrypt.hash(req.body.password, 10, (err, hash)=>{
-            if(!hash){
-                return res.status(401).json({ error: err})
-            }
+        bcrypt.hash(req.body.password, 10)
+        .then((hash) => {
+            
             req.body.password = hash
-            User.create(req.body ,(err, user) =>{
-                if (!user) { return res.status(500).json(err) }
-                return res.status(201).json(user)
-                
-            }
-            )
-        }) 
+            User.create(req.body)
+            .then(user => res.status(201).json(user) )
+            .catch(err => res.status(500).json(err) )
+        })
+        .catch(err => res.status(500).json(err))
+
     }
 ]
 
-module.exports.login = [
+export const login = [
     body("email", "Pls enter valid email & password")
         .trim()
         .isLength({min:3})
@@ -38,6 +39,7 @@ module.exports.login = [
         .trim()
         .isLength({min:3})
         .escape(),
+
     (req, res) => {
         const err = validationResult(req.body)
         if(!err.isEmpty()) { return res.status(401).json( {errors : err.array()})}
