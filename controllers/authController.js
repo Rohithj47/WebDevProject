@@ -46,6 +46,7 @@ export const login = [
         .escape(),
 
     (req, res) => {
+        console.log(`Request email = ${req.body.email} and password is ${req.body.password}`)
         const err = validationResult(req.body)
         if(!err.isEmpty()) { return res.status(401).json( {errors : err.array()})}
 
