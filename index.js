@@ -24,7 +24,7 @@ connect(process.env.MONGOURI)
     .then(() => {
         console.log("Connected to DB")
     })
-    .catch((e) => {
+    .catch((err) => {
         console.log(err)
     })
 

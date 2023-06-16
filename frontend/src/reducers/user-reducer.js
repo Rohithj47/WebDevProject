@@ -43,6 +43,11 @@ const userSlice = createSlice({
                 console.log(action.payload)
                 state.currentUser = action.payload
             })
+            .addCase(getUserThunk.rejected, (state, action) => {
+                state.loading = false
+                state.currentUser = null
+                state.error = action.payload
+            })
     }
 })
 

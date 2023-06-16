@@ -14,7 +14,6 @@ export const loginThunk = createAsyncThunk(
     'user/login',
     async ({ email, password }) => {
         try {
-
             const user = await userService.login({ email, password })
             return user
         } catch(err) {
@@ -26,8 +25,11 @@ export const loginThunk = createAsyncThunk(
 export const getUserThunk = createAsyncThunk(
     'user/getUser',
     async () => {
-        const response = await userService.getUser()
-        console.log(response.data)
-        return response.data
+        try {
+            const user = await userService.getUser()
+            return user
+        } catch(err) {
+            throw Error({"Error" : err})
+        }
     }
 )
