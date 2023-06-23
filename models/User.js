@@ -1,62 +1,90 @@
-import { Schema, model } from 'mongoose';
+import mongoose from "mongoose";
+const { Schema } = mongoose;
+import passportLocalMongoose from "passport-local-mongoose";
 
-const schema = new Schema({
-    username:{
-        type: String,
-        require: true,
-        unique: true,
-        min: 3
-    },
-    email: {
-        type: String,
-        required: true,
-        max: 50,
-        unique: true
-    },
-    password: {
-        type: String,
-        min: 6,
-        require: true 
-    },
-    profilePicture: {
-        type: String,
-        default: ""
-    },
-    coverPicture: {
-        type: String,
-        default: ""
-    },
-    followers : {
-        type: Array,
-        default: []
-    },
-    following : {
-        type: Array,
-        default: []
-    },
-    reviews : {
-        type: Array,
-        default: []
-    },
-    owned : {
-        type: Array,
-        default: []
-    },
-    role: {
-        type: String,
-        enum: ['admin', 'owner', 'user'],
-        default: 'user',
-    },
-    city: {
-        type: String,
-        max: 50
-    },
-    from: {
-        type: String,
-        max: 50
-    }
+const SessionSchema = new Schema({
+  refreshToken: {
+    type: String,
+    default: "",
+  },
+});
 
-}, { timestamps: true });
+const UserSchema = new Schema({
+  firstName: {
+    type: String,
+    default: "",
+  },
+  lastName: {
+    type: String,
+    default: "",
+  },
+  username: {
+    type: String,
+    default: "",
+  },
+  email: {
+    type: String,
+    default: "",
+  },
+  phone: {
+    type: String,
+    default: "",
+  },
+  city: {
+    type: String,
+    default: "",
+  },
+  role: {
+    type: String,
+    default: "user",
+  },
+  bio: {
+    type: String,
+    default: "",
+  },
+  photo: {
+    type: String,
+    default: "",
+  },
+  likes: {
+    type: Array,
+    default: [],
+  },
+  dislikes: {
+    type: Array,
+    default: [],
+  },
+  visits: {
+    type: Array,
+    default: [],
+  },
+  owns: {
+    type: Array,
+    default: [],
+  },
+  authStrategy: {
+    type: String,
+    default: "local",
+  },
+  points: {
+    type: Number,
+    default: 50,
+  },
+  refreshToken: {
+    type: [SessionSchema],
+  },
+});
 
-const User = model('User', schema);
-export default User 
+// Remove refreshToken from the response
+UserSchema.set("toJSON", {
+  transform: function (doc, ret, options) {
+    delete ret.refreshToken;
+    return ret;
+  },
+});
+
+UserSchema.plugin(passportLocalMongoose);
+
+const UserModel = mongoose.model("User", UserSchema);
+
+export default UserModel;
