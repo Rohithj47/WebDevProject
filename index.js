@@ -7,7 +7,7 @@ import { config } from 'dotenv'
 import { connect } from 'mongoose'
 import session from "express-session";
 import userRouter from "./routes/user.js"
-// import brewRouter from './routes/brew'
+import brewRouter from './routes/brew.js'
 
 
 
@@ -56,7 +56,7 @@ app.use(passport.initialize());
 
 //Routes
 app.use("/users", userRouter)
-// app.use("/breweries", brewRouter)
+app.use("/breweries", brewRouter)
 
 app.get("/", function (req, res) {
   res.send({ status: "Hello" });
