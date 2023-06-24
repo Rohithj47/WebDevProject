@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import { config } from 'dotenv'
 import { connect } from 'mongoose'
 import session from "express-session";
+import userRouter from "./routes/user.js"
+// import brewRouter from './routes/brew'
 
 
 
@@ -24,17 +26,18 @@ connect(process.env.MONGOURI)
 //Setup Auth stratergies
 import "./stratergy.js"
 
+//TODO: Does this have to be here?
 //Setup cookie options
 import "./authenticate.js"
 
-import userRouter from "./routes/userRoutes";
-import breweryRouter from "./routes/breweryRoutes";
 
 const app = express();
 
 app.use(
   cors({
-    origin: process.env.WHITELISTED_DOMAIN,
+    //TODO: FIX this
+    // origin: process.env.WHITELISTED_DOMAIN,
+    origin: 'http://localhost:3000',
     credentials: true,
   })
 );
@@ -50,12 +53,17 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use(passport.initialize());
 
+
+//Routes
+app.use("/users", userRouter)
+// app.use("/breweries", brewRouter)
+
 app.get("/", function (req, res) {
-  res.send({ status: "success" });
+  res.send({ status: "Hello" });
 });
 
-//Start the server in port 8081
+//Starting the server
 
-server.listen(process.env.PORT, () => {
-  console.log(`listening on process.env.PORT ${process.env.PORT}`)
+app.listen(process.env.PORT, () => {
+  console.log(`listening on port ${process.env.PORT}`)
 })
