@@ -8,6 +8,7 @@ import { connect } from 'mongoose'
 import session from "express-session";
 import userRouter from "./routes/user.js"
 import brewRouter from './routes/brew.js'
+import morgan from "morgan";
 
 
 
@@ -52,7 +53,7 @@ app.use(session({
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use(passport.initialize());
-
+app.use(morgan("short"))
 
 //Routes
 app.use("/users", userRouter)

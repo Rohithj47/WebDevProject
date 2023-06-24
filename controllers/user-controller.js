@@ -28,14 +28,15 @@ const getRefreshToken = (userToBeSigned) =>
 
 export const getUser = [
     (req, res, next) => {
-        const { signedCookie: { refreshToken } = {} } = req;
+        const { signedCookies = {} } = req
+        const { refreshToken } = signedCookies
         
         //return if token not found
         if (!refreshToken){
             return res.status(401).send("Unauthorized")
         }
 
-        const pload = jwt.verify(refreshToken, process.env.RTOKEN_SECRET)
+        const pload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
         User.findOne({ _id: pload._id })
             .then(user => {
                 if (user) {
@@ -99,13 +100,13 @@ export const register = [
                     
                     const newToken = getToken({ _id: user._id })
                     const newRefTkn = getRefreshToken({ _id: user._id })
-                    user.refreshToken.push({ newRefTkn })
+                    user.refreshToken.push({ refreshToken: newRefTkn })
                     user.save((err, user) => {
                         if (err) {
                             return res.status(500).send(err);
                         } else {
                             res.cookie("refreshToken", newRefTkn, COOKIE_OPTION)
-                            res.send({ success: true, newToken })
+                            res.send({ success: true, token: newToken })
                         }
                     })
                 }
@@ -122,13 +123,15 @@ export const login = [
         //Check if User already exists
         User.findById(req.user._id).then(
             user => {
-                user.refreshToken.push({ newRefTkn })
+                user.refreshToken.push({ 
+                    refreshToken: newRefTkn
+                 })
                 user.save((err, user) => {
                     if (err) {
                         return res.status(500).send(err);
                     } else {
                         res.cookie("refreshToken", newRefTkn, COOKIE_OPTION)
-                        res.send({ success: true, newToken })
+                        res.send({ success: true, token: newToken })
                     }
                 })
             },
