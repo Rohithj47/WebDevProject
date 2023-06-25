@@ -34,11 +34,12 @@ import "./authenticate.js"
 
 const app = express();
 
+const origins = process.env.WHITELISTED_DOMAINS;
+const originsArray = origins.split(",");
+
 app.use(
   cors({
-    //TODO: FIX this
-    // origin: process.env.WHITELISTED_DOMAIN,
-    origin: 'http://localhost:3000',
+    origin: originsArray,
     credentials: true,
   })
 );
