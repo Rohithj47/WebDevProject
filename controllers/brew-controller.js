@@ -384,17 +384,23 @@ export const deleteReview = [
             Review.deleteOne({ bid: req.body.bid, username: req.body.username })
                 .then(_ => {
                     //Delete for Brewery as well
-                    Brewery.updateOne(
-                        { bid: req.body.bid },
-                        { $pull: { "reviewedBy": req.user._id } },
-                        { upsert: false }
-                    )
-                        .then(() => {
-                            res.send({ success: true });
-                        })
-                        .catch(err => {
+                    User.findOne({ username: req.body.username })
+                        .then((user => {
+                            Brewery.updateOne(
+                                { bid: req.body.bid },
+                                { $pull: { "reviewedBy": user._id } },
+                                { upsert: false }
+                            )
+                                .then(() => {
+                                    res.send({ success: true });
+                                })
+                                .catch(err => {
+                                    return res.status(500).send(err)
+                                });
+                        }))
+                        .catch((err) => {
                             return res.status(500).send(err)
-                        });
+                        })
                 })
                 .catch(err => {
                     return res.status(500).send(err)

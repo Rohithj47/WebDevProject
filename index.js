@@ -27,9 +27,7 @@ connect(process.env.MONGOURI)
 //Setup Auth stratergies
 import "./stratergy.js"
 
-//TODO: Does this have to be here?
-//Setup cookie options
-import "./authenticate.js"
+
 
 
 const app = express();
