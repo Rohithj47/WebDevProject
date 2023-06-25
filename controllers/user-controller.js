@@ -44,20 +44,20 @@ export const getUser = [
                     if (tknIndx === -1) {
                         return res.status(401).send("Unauthorized")
                     }
-                    const newToken = jwt.sign({ _id: pload._id}, process.env.JWT_SECRET, {
+                    const token = jwt.sign({ _id: pload._id}, process.env.JWT_SECRET, {
                         expiresIn: eval(process.env.SESSION_EXPIRY)
                     })
 
-                    const newRefTkn = jwt.sign({ _id: pload._id }, process.env.REFRESH_TOKEN_SECRET, {
+                    const newRefreshToken = jwt.sign({ _id: pload._id }, process.env.REFRESH_TOKEN_SECRET, {
                         expiresIn: eval(process.env.REFRESH_TOKEN_EXPIRY)
                     })
-
+                    user.refreshToken[tknIndx] = { refreshToken: newRefreshToken }
                     user.save((err, user) => {
                         if (err) {
                             return res.status(500).send("Error updating user")
                         } else {
-                            res.cookie("refreshToken", newRefTkn, COOKIE_OPTION)
-                            res.send({ success: true, newToken })
+                            res.cookie("refreshToken", newRefreshToken, COOKIE_OPTION)
+                            res.send({ success: true, token })
                         }
                     })
                 }
@@ -117,21 +117,19 @@ export const register = [
 
 export const login = [
     (req, res, next) => {
-        const newToken = getToken({ _id: req.user._id })
-        const newRefTkn = getRefreshToken({ _id: req.user._id })
+        const token = getToken({ _id: req.user._id })
+        const refreshToken = getRefreshToken({ _id: req.user._id })
 
         //Check if User already exists
         User.findById(req.user._id).then(
             user => {
-                user.refreshToken.push({ 
-                    refreshToken: newRefTkn
-                 })
+                user.refreshToken.push({ refreshToken })
                 user.save((err, user) => {
                     if (err) {
                         return res.status(500).send(err);
                     } else {
-                        res.cookie("refreshToken", newRefTkn, COOKIE_OPTION)
-                        res.send({ success: true, token: newToken })
+                        res.cookie("refreshToken", refreshToken, COOKIE_OPTION)
+                        res.send({ success: true, token })
                     }
                 })
             },

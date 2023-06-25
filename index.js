@@ -39,7 +39,8 @@ const originsArray = origins.split(",");
 
 app.use(
   cors({
-    origin: originsArray,
+    // origin: originsArray,
+    origin: 'http://localhost:3000',
     credentials: true,
   })
 );
