@@ -233,7 +233,7 @@ export const own = [
                 message: "Require Brewery ID",
             });
         } 
-        if (req.user.role !== 'admin') {
+        if (req.user.role !== 'owner') {
             return res.status(401).send({
                 name: "owner",
                 message: "Have to be Admin to do this!",
